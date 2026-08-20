@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Doctor Auto Prime — portal empresa (dark only).
+ * Tokens: pmo-oficina-init/portal design-tokens + index.css
+ * Sem light mode.
+ */
+@layer base {
+  :root {
+    /* DAP brand (hex mirrors for raw use) */
+    --dap-black: #000000;
+    --dap-graphite: #0e0e0e;
+    --dap-carbon: #1a1a1a;
+    --dap-red: #d10a11;
+    --dap-red-deep: #8c0808;
+    --dap-red-bright: #c8000a;
+    --dap-white: #f8f8f8;
+    --dap-gray: #c8c8c8;
+    --dap-whatsapp: #25d366;
+    --dap-gold: #c8a96e;
+
+    /* shadcn/HSL mapped to DAP dark — portal empresa forever dark */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 97%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 97%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 97%;
+    --primary: 357 91% 43%;
+    --primary-foreground: 0 0% 97%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 97%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 78%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 97%;
+    --destructive: 357 91% 43%;
+    --destructive-foreground: 0 0% 97%;
+    --border: 0 89% 29%;
+    --input: 0 89% 29%;
+    --ring: 357 91% 43%;
+    --radius: 0.125rem;
+
+    --font-display: "Anton", sans-serif;
+    --font-body: "Barlow Condensed", sans-serif;
+  }
+
+  * {
+    @apply border-dap-red-deep/40;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply min-h-screen bg-dap-black font-body text-dap-white antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--dap-red) 35%, transparent);
+    color: var(--dap-white);
+  }
+}
+
+@layer components {
+  .dap-motion-bg {
+    background-color: var(--dap-black);
+    background-image:
+      repeating-linear-gradient(
+        -32deg,
+        transparent,
+        transparent 18px,
+        color-mix(in srgb, var(--dap-red) 6%, transparent) 18px,
+        color-mix(in srgb, var(--dap-red) 6%, transparent) 19px
+      ),
+      linear-gradient(180deg, var(--dap-black) 0%, var(--dap-graphite) 100%);
+  }
+
+  .dap-display {
+    font-family: var(--font-display);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.05;
+  }
+
+  .dap-label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.2em] text-dap-gray;
+  }
+
+  .dap-kicker {
+    @apply text-[10px] font-semibold uppercase tracking-[0.22em] text-dap-red;
+  }
+
+  .dap-field {
+    @apply rounded-sm border border-dap-red-deep/60 bg-dap-black px-3 py-2 text-sm text-dap-white outline-none transition-colors duration-150 placeholder:text-dap-gray/40 focus:border-dap-red;
+  }
+
+  .dap-nav-active {
+    @apply border-l-2 border-dap-red bg-dap-red/10 text-dap-red;
+  }
+
+  .dap-nav-idle {
+    @apply border-l-2 border-transparent text-dap-gray hover:border-dap-red-deep/80 hover:bg-dap-carbon hover:text-dap-white;
+  }
+
+  .dap-card {
+    @apply rounded-sm border border-dap-red-deep/50 bg-dap-carbon p-4;
+  }
+
+  .dap-card-ai {
+    @apply rounded-sm border border-dap-red-bright/40 bg-dap-carbon p-4;
+  }
+
+  .dap-card-premium {
+    @apply rounded-sm border border-dap-gold/50 bg-dap-carbon p-4;
+  }
+}
