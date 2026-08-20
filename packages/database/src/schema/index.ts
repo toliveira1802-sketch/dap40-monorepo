@@ -1,4 +1,6 @@
-﻿import { pgTable, text, timestamp, uuid, integer, numeric, pgEnum } from "drizzle-orm/pg-core";
+export { profiles, userRoles, userRoleEnum } from "./auth";
+
+import { pgTable, text, timestamp, uuid, integer, numeric, pgEnum } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("user_role", ["ADMIN", "CONSULTOR", "TECNICO", "CLIENTE"]);
 export const orderStatusEnum = pgEnum("order_status", [
