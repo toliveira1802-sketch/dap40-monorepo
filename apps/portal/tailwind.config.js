@@ -47,7 +47,7 @@ export default {
           black: "#000000",
           graphite: "#0E0E0E",
           carbon: "#1A1A1A",
-          red: "#D10A11",
+          red: "#E51A1A",
           "red-deep": "#8C0808",
           "red-bright": "#C8000A",
           white: "#F8F8F8",

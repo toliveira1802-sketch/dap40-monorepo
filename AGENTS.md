@@ -13,3 +13,4 @@
 1. **Zero Schema Duplication:** Toda entidade de banco reside exclusivamente em `packages/database`.
 2. **Contract First:** Crie e atualize schemas Zod em `packages/types` antes de implementar rotas na API ou formulários no frontend.
 3. **Type Safety:** Todas as fronteiras de dados utilizam inferência Zod/Drizzle sem tipos soltos (`any`).
+4. **Portal:** Ver `.cursor/rules/portal-contrato.mdc` — DAP-REAL only; `App.tsx`/`main.tsx` só no prompt 4; features exportam `routes.tsx`; auth em `features/shared/auth`; senha fora do git; `apps/client` fora.
