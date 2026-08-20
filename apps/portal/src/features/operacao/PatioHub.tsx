@@ -13,7 +13,7 @@ function PatioTabBar() {
   const pathname = location.split("?")[0] || "/patio/kanban";
 
   return (
-    <div className="mb-5 flex flex-wrap gap-1 rounded-xl border border-border/70 bg-card/50 p-1">
+    <div className="mb-5 flex flex-wrap gap-1 rounded-sm border border-dap-red-deep/50 bg-dap-carbon p-1">
       {PATIO_TABS.map(tab => {
         const active = pathname === tab.path || pathname.startsWith(`${tab.path}/`);
         return (
@@ -22,10 +22,10 @@ function PatioTabBar() {
             type="button"
             onClick={() => setLocation(tab.path)}
             className={cn(
-              "min-w-[7.5rem] flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
+              "min-w-[7.5rem] flex-1 rounded-sm px-3 py-2 text-sm font-semibold uppercase tracking-wide transition-colors",
               active
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                ? "bg-dap-red text-dap-white shadow-sm"
+                : "text-dap-gray hover:bg-dap-graphite hover:text-dap-white"
             )}
           >
             {tab.label}
@@ -43,7 +43,7 @@ export default function PatioHubPage() {
       <Suspense
         fallback={
           <div className="grid min-h-[40vh] place-items-center">
-            <Spinner className="size-5 text-primary" />
+            <Spinner className="size-5 text-dap-red" />
           </div>
         }
       >
