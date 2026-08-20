@@ -13,7 +13,7 @@
     --dap-black: #000000;
     --dap-graphite: #0e0e0e;
     --dap-carbon: #1a1a1a;
-    --dap-red: #d10a11;
+    --dap-red: #e51a1a;
     --dap-red-deep: #8c0808;
     --dap-red-bright: #c8000a;
     --dap-white: #f8f8f8;
@@ -28,7 +28,7 @@
     --card-foreground: 0 0% 97%;
     --popover: 0 0% 7%;
     --popover-foreground: 0 0% 97%;
-    --primary: 357 91% 43%;
+    --primary: 0 80% 50%;
     --primary-foreground: 0 0% 97%;
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 97%;
@@ -36,11 +36,11 @@
     --muted-foreground: 0 0% 78%;
     --accent: 0 0% 12%;
     --accent-foreground: 0 0% 97%;
-    --destructive: 357 91% 43%;
+    --destructive: 0 80% 50%;
     --destructive-foreground: 0 0% 97%;
     --border: 0 89% 29%;
     --input: 0 89% 29%;
-    --ring: 357 91% 43%;
+    --ring: 0 80% 50%;
     --radius: 0.125rem;
 
     --font-display: "Anton", sans-serif;

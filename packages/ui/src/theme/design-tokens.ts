@@ -6,7 +6,7 @@ export const DAP_COLORS = {
   black: "#000000",
   graphite: "#0E0E0E",
   carbon: "#1A1A1A",
-  red: "#D10A11",
+  red: "#E51A1A",
   redDeep: "#8C0808",
   redBright: "#C8000A",
   white: "#F8F8F8",

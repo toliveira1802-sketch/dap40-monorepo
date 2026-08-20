@@ -1,21 +1,21 @@
-import React, { Suspense } from "react";
+import { Suspense, type ComponentType } from "react";
 import { Route, Switch, Redirect } from "wouter";
-import { Layout } from "./features/shared/layout/Layout";
 import { Toaster } from "sonner";
-
-// 12 Operation Screens (ERP)
-import DashboardPage from "./features/operacao/Dashboard";
-import PatioHubPage from "./features/operacao/PatioHub";
-import YardPage from "./features/operacao/Yard";
-import PatioMapPage from "./features/operacao/PatioMap";
-import ServiceOrdersPage from "./features/operacao/ServiceOrders";
-import NewServiceOrderWizardPage from "./features/operacao/NewServiceOrderWizard";
-import ServiceOrderWorkspacePage from "./features/operacao/ServiceOrderWorkspace";
-import AppointmentsPage from "./features/operacao/Appointments";
-import OccurrencesPage from "./features/operacao/Occurrences";
-import VehiclesPage from "./features/operacao/Vehicles";
-import TeamPage from "./features/operacao/Team";
-import MechanicAgendaPage from "./features/operacao/MechanicAgenda";
+import type { AccessSystem } from "@dap40/types";
+import { Layout } from "./features/shared/layout/Layout";
+import {
+  AuthProvider,
+  RequireAuth,
+  RequirePortal,
+  PublicOnly,
+  CHANGE_PASSWORD_PATH,
+} from "./features/shared/auth";
+import HubPage from "./features/shared/HubPage";
+import {
+  publicFeatureRoutes,
+  protectedFeatureRoutes,
+} from "./lib/routeRegistry";
+import type { PortalRoute } from "./lib/portalRoutes";
 
 function LoadingFallback() {
   return (
@@ -25,46 +25,64 @@ function LoadingFallback() {
   );
 }
 
+function withPortalGrant(system: AccessSystem | undefined, Page: ComponentType) {
+  if (!system) return Page;
+  return function GrantedPage() {
+    return (
+      <RequirePortal system={system}>
+        <Page />
+      </RequirePortal>
+    );
+  };
+}
+
+function renderFeatureRoute(route: PortalRoute) {
+  const Page = withPortalGrant(route.system, route.component);
+  return <Route key={route.path} path={route.path} component={Page} />;
+}
+
+function ShellRoutes() {
+  return (
+    <RequireAuth>
+      <Layout>
+        <Toaster position="top-right" richColors theme="dark" />
+        <Suspense fallback={<LoadingFallback />}>
+          <Switch>
+            <Route path="/hub" component={HubPage} />
+            {protectedFeatureRoutes.map(renderFeatureRoute)}
+            <Route>
+              <Redirect to="/hub" />
+            </Route>
+          </Switch>
+        </Suspense>
+      </Layout>
+    </RequireAuth>
+  );
+}
+
 export function App() {
   return (
-    <Layout>
-      <Toaster position="top-right" richColors theme="dark" />
-      <Suspense fallback={<LoadingFallback />}>
-        <Switch>
-          {/* Dashboard */}
-          <Route path="/" component={DashboardPage} />
-          <Route path="/dashboard" component={DashboardPage} />
-
-          {/* Patio Hub & Tabs */}
-          <Route path="/patio/kanban" component={YardPage} />
-          <Route path="/patio/mapa" component={PatioMapPage} />
-          <Route path="/patio/ordens" component={ServiceOrdersPage} />
-          <Route path="/patio" component={PatioHubPage} />
-
-          {/* Map Direct Routes */}
-          <Route path="/mapa" component={PatioMapPage} />
-
-          {/* Service Orders */}
-          <Route path="/ordens-servico/nova" component={NewServiceOrderWizardPage} />
-          <Route path="/ordens-servico/workspace/:id" component={ServiceOrderWorkspacePage} />
-          <Route path="/ordens-servico/:id" component={ServiceOrderWorkspacePage} />
-          <Route path="/ordens-servico" component={ServiceOrdersPage} />
-
-          {/* Appointments / Occurrences / Vehicles / Team / Mechanic Agenda */}
-          <Route path="/agendamentos" component={AppointmentsPage} />
-          <Route path="/ocorrencias" component={OccurrencesPage} />
-          <Route path="/veiculos" component={VehiclesPage} />
-          <Route path="/equipe" component={TeamPage} />
-          <Route path="/agenda-mecanicos" component={MechanicAgendaPage} />
-          <Route path="/mecanicos" component={MechanicAgendaPage} />
-
-          {/* Fallback */}
-          <Route>
-            <Redirect to="/dashboard" />
-          </Route>
-        </Switch>
-      </Suspense>
-    </Layout>
+    <AuthProvider>
+      <Switch>
+        {publicFeatureRoutes.map(route => {
+          const Page = route.component;
+          // /trocar-senha exige sessão — PublicOnly quebraria o fluxo must_change.
+          if (route.path === CHANGE_PASSWORD_PATH) {
+            return <Route key={route.path} path={route.path} component={Page} />;
+          }
+          return (
+            <Route key={route.path} path={route.path}>
+              <PublicOnly>
+                <Page />
+              </PublicOnly>
+            </Route>
+          );
+        })}
+        <Route>
+          <ShellRoutes />
+        </Route>
+      </Switch>
+    </AuthProvider>
   );
 }
 
