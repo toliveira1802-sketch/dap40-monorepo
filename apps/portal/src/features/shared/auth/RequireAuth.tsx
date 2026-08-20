@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { Redirect, useLocation } from "wouter";
 import type { AccessSystem } from "@dap40/types";
-import { useSession, type SessionSystems } from "./session";
+import { canAccessPortal } from "../../empresa/admin/canAccess";
+import { useSession } from "./session";
 import { CHANGE_PASSWORD_PATH, LOGIN_PATH, loginUrl } from "./paths";
 
 function LoadingScreen() {
@@ -34,9 +35,8 @@ export function RequirePortal({
   children: ReactNode;
 }) {
   const { session } = useSession();
-  const level = (session?.systems as SessionSystems | undefined)?.[system];
-  if (!level || level === "none") {
-    return <Redirect to="/" />;
+  if (!canAccessPortal(session?.systems, system, session?.role)) {
+    return <Redirect to="/hub" />;
   }
   return <>{children}</>;
 }

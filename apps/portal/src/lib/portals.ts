@@ -24,7 +24,7 @@ export const OFFICE_PORTALS: Array<{
     id: "PORTAL-GESTAO",
     label: ACCESS_SYSTEM_LABELS["PORTAL-GESTAO"],
     path: "/gestao",
-    description: "Acessos, BI e áreas",
+    description: "BI, indicadores e áreas",
   },
   {
     id: "PORTAL-MECANICO",
@@ -36,7 +36,7 @@ export const OFFICE_PORTALS: Array<{
     id: "PORTAL-EMPRESA",
     label: ACCESS_SYSTEM_LABELS["PORTAL-EMPRESA"],
     path: "/aios",
-    description: "AIOS / agentes e features",
+    description: "Dev / empresa — flutuação livre no projeto",
   },
 ];
 
@@ -47,7 +47,10 @@ export function hasPortalAccess(
   portalId: AccessSystem,
   role?: UserRole | null
 ): boolean {
+  /** PORTAL-EMPRESA (Dev) ou MASTER → flutuação em todos os portais. */
   if (role === "MASTER") return true;
+  const dev = systems?.["PORTAL-EMPRESA"];
+  if (dev && dev !== "none") return true;
   const level = systems?.[portalId];
   return Boolean(level && level !== "none");
 }

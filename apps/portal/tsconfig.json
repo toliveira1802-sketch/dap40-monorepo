@@ -9,5 +9,6 @@
       "@shared/*": ["./src/shared/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/features/gestao"]
 }

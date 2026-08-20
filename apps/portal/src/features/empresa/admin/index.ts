@@ -1,7 +1,15 @@
-export { canAccessPortal, canAccessPage, type SessionSystems } from "./canAccess";
+export {
+  canAccessPortal,
+  canAccessPage,
+  hasProjectFloatAccess,
+  DEV_PORTAL_SYSTEM,
+  type SessionSystems,
+} from "./canAccess";
 export {
   MANAGED_SYSTEMS,
   ACCESS_LEVEL_LABELS,
+  PAGE_EMPRESA_ACESSOS,
+  SYSTEM_EMPRESA,
   PAGE_GESTAO_ACESSOS,
   SYSTEM_GESTAO,
   systemLabel,

@@ -1,7 +1,10 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Redirect } from "wouter";
 import { useSession } from "../shared/auth";
-import { canAccessPortal } from "../empresa/admin/canAccess";
+import {
+  canAccessPortal,
+  hasProjectFloatAccess,
+} from "../empresa/admin/canAccess";
 import { hasPageGrant } from "../empresa/admin/api";
 
 function Loading() {
@@ -14,7 +17,7 @@ function Loading() {
 
 /**
  * Sem grant ERP ou da página (access_page_grants / has_page), não renderiza.
- * MASTER passa direto.
+ * MASTER e grant PORTAL-EMPRESA (Dev) passam direto — flutuação livre.
  */
 export function RequireErpPage({
   pageId,
@@ -35,7 +38,7 @@ export function RequireErpPage({
         if (!cancelled) setAllowed(false);
         return;
       }
-      if (session.role === "MASTER") {
+      if (hasProjectFloatAccess(session.systems, session.role)) {
         if (!cancelled) setAllowed(true);
         return;
       }
