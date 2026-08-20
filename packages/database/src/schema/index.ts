@@ -1,6 +1,16 @@
 ﻿import { pgTable, text, timestamp, uuid, integer, numeric, pgEnum } from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum("user_role", ["ADMIN", "CONSULTOR", "TECNICO", "CLIENTE"]);
+export { profiles, userRoles, userRoleEnum } from "./auth";
+export {
+  accessSystemEnum,
+  accessLevelEnum,
+  accessPages,
+  accessGrants,
+  accessPageGrants,
+} from "./access";
+
+/** @deprecated Prefer userRoleEnum / public.user_role canônico (MASTER…). */
+export const roleEnum = pgEnum("legacy_app_role", ["ADMIN", "CONSULTOR", "TECNICO", "CLIENTE"]);
 export const orderStatusEnum = pgEnum("order_status", [
   "CHECKIN",
   "TRIAGEM",
