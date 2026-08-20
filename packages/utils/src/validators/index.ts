@@ -4,3 +4,9 @@
   const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
   return standardRegex.test(cleaned) || mercosulRegex.test(cleaned);
 }
+
+export {
+  INITIAL_USER_PASSWORD,
+  validateDefinitivePassword,
+  type PasswordValidation,
+} from "./password";
