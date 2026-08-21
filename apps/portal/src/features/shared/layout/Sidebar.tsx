@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@dap40/ui";
 import { BrandLogo } from "./BrandLogo";
-import { useSession, isMasterRole } from "../auth";
+import { useSession } from "../auth";
 import { listUnlockedPortals, type SessionSystems } from "../../../lib/portals";
 import {
   listPortalNavItems,
@@ -157,8 +157,7 @@ export function Sidebar() {
                   {session?.fullName || "Usuário"}
                 </span>
                 <span className="truncate text-[0.65rem] text-dap-gray">
-                  {session?.role ?? "—"}
-                  {isMasterRole(session?.role) ? " · Admin" : ""}
+                  {session?.email || "—"}
                 </span>
               </div>
               <ShieldCheck className="size-4 shrink-0 text-dap-whatsapp" />

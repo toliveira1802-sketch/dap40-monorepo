@@ -1,0 +1,23 @@
+---
+alwaysApply: true
+---
+# Contrato Portal DAP40
+
+- Workspace: `C:\Users\docto\DOCTOR\DAP40`
+- Banco: **DAP-REAL** (`grnfocascmpcpycofxrd`). DAP AIOS = teste, não alvo.
+- Senha **nunca** no git. Só `.env.local` / env Vercel se precisar.
+- `apps/client` = fora deste fluxo (outra via).
+
+## Casco e rotas
+
+- **Só o prompt 4** edita `apps/portal/src/App.tsx` e `apps/portal/src/main.tsx`.
+- Cada feature exporta `routes.tsx` (array de rotas). O casco agrega; features não montam o router sozinhas.
+- Sem grant de acesso, a rota **não renderiza**.
+- Sessão/login: importar de `features/shared/auth`. **Não** copiar tela de login.
+
+## Auth
+
+- Login único: `apps/portal/src/features/shared` → `/login`
+- Usar `profiles`, `user_roles`, `must_change_password` existentes. Sem tabela nova de auth.
+
+Respostas ao usuário: pt-BR, curtas.

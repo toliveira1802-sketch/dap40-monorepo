@@ -9,6 +9,7 @@ export {
   MANAGED_SYSTEMS,
   ACCESS_LEVEL_LABELS,
   PAGE_EMPRESA_ACESSOS,
+  PAGE_EMPRESA_EQUIPE,
   SYSTEM_EMPRESA,
   PAGE_GESTAO_ACESSOS,
   SYSTEM_GESTAO,
@@ -20,6 +21,7 @@ export {
   type EmpresaAdminRoute,
 } from "./routes";
 export { default as AcessosPage } from "./AcessosPage";
+export { default as EquipePage } from "./EquipePage";
 export {
   fetchAccessPages,
   fetchAccessUsers,

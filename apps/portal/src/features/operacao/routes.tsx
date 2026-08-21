@@ -43,7 +43,7 @@ const CadastroOs = withErpPage(ServiceOrdersPage, "erp.cadastro.os");
 
 /**
  * Rotas de Operação (ERP).
- * prompt 4 registra isto no casco (App.tsx).
+ * Cadastro de colaboradores fica no portal AIOS (Dev), não aqui.
  */
 export const routes: PortalRoute[] = [
   {
@@ -58,7 +58,6 @@ export const routes: PortalRoute[] = [
       matchPrefix: "/dashboard",
     },
   },
-  // Sub-rotas do hub antes de /patio (Switch = first match)
   { path: "/patio/kanban", component: Patio, system: ERP, page: "erp.patio" },
   { path: "/patio/mapa", component: Patio, system: ERP, page: "erp.patio" },
   { path: "/patio/ordens", component: Patio, system: ERP, page: "erp.patio" },

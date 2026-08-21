@@ -12,7 +12,7 @@ export const OFFICE_PORTALS: Array<{
     id: "ERP",
     label: ACCESS_SYSTEM_LABELS.ERP,
     path: "/dashboard",
-    description: "Pátio, OS, agenda e equipe",
+    description: "Pátio, OS e agenda",
   },
   {
     id: "CRM",

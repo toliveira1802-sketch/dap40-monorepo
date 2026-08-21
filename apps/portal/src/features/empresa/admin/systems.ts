@@ -27,6 +27,8 @@ export function systemLabel(system: AccessSystem): string {
 
 /** Criador de acessos — portal Dev / AIOS Empresa. */
 export const PAGE_EMPRESA_ACESSOS = "empresa.acessos";
+/** Cadastro de colaboradores — só Dev (implantação). */
+export const PAGE_EMPRESA_EQUIPE = "empresa.equipe";
 export const SYSTEM_EMPRESA: AccessSystem = "PORTAL-EMPRESA";
 
 /** @deprecated Use PAGE_EMPRESA_ACESSOS */
