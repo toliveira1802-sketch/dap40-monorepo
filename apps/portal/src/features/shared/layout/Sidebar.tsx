@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-  LayoutGrid,
   Wrench,
   Circle,
 } from "lucide-react";
@@ -111,21 +110,7 @@ export function Sidebar() {
 
       <div className="relative flex flex-1 flex-col gap-4 overflow-y-auto px-2 py-3">
         <div>
-          {!collapsed ? <p className="dap-kicker mb-2 px-2">Portais</p> : null}
           <nav className="space-y-1">
-            <button
-              type="button"
-              title={collapsed ? "Hub" : undefined}
-              onClick={() => setLocation("/hub")}
-              className={cn(
-                "group flex w-full items-center gap-3 rounded-sm px-2 py-2 text-sm transition-colors duration-150",
-                location === "/hub" ? "dap-nav-active" : "dap-nav-idle"
-              )}
-            >
-              <LayoutGrid className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-              {!collapsed ? <span className="truncate font-medium">Hub</span> : null}
-            </button>
-
             {unlockedPortals.map(portal => (
               <PortalMenu
                 key={portal.id}
