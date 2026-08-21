@@ -1,6 +1,7 @@
 ﻿import Fastify from "fastify";
 import cors from "@fastify/cors";
 import * as dotenv from "dotenv";
+import metaInboxPlugin from "./metaInbox";
 
 dotenv.config({ path: "../../.env" });
 
@@ -11,6 +12,8 @@ const server = Fastify({
 server.register(cors, {
   origin: true
 });
+
+server.register(metaInboxPlugin);
 
 server.get("/health", async () => {
   return { status: "ok", service: "DAP40 API", timestamp: new Date().toISOString() };
