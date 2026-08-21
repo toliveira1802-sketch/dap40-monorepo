@@ -2,6 +2,7 @@ import type { AccessSystem, UserRole } from "@dap40/types";
 import { routes as authRoutes } from "../features/shared/auth/routes";
 import { routes as operacaoRoutes } from "../features/operacao/routes";
 import { routes as empresaAdminRoutes } from "../features/empresa/admin/routes";
+import { routes as gestaoRoutes } from "../features/gestao/routes";
 import type { PortalRoute } from "./portalRoutes";
 import { OFFICE_PORTALS, hasPortalAccess, type SessionSystems } from "./portals";
 
@@ -10,6 +11,7 @@ export const featureRoutes: PortalRoute[] = [
   ...authRoutes,
   ...operacaoRoutes,
   ...empresaAdminRoutes,
+  ...gestaoRoutes,
 ];
 
 export const publicFeatureRoutes = featureRoutes.filter(r => r.public);

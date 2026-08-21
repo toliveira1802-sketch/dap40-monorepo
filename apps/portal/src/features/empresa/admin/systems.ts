@@ -25,5 +25,11 @@ export function systemLabel(system: AccessSystem): string {
   return ACCESS_SYSTEM_LABELS[system] ?? system;
 }
 
-export const PAGE_GESTAO_ACESSOS = "gestao.acessos";
-export const SYSTEM_GESTAO: AccessSystem = "PORTAL-GESTAO";
+/** Criador de acessos — portal Dev / AIOS Empresa. */
+export const PAGE_EMPRESA_ACESSOS = "empresa.acessos";
+export const SYSTEM_EMPRESA: AccessSystem = "PORTAL-EMPRESA";
+
+/** @deprecated Use PAGE_EMPRESA_ACESSOS */
+export const PAGE_GESTAO_ACESSOS = PAGE_EMPRESA_ACESSOS;
+/** @deprecated Use SYSTEM_EMPRESA */
+export const SYSTEM_GESTAO = SYSTEM_EMPRESA;

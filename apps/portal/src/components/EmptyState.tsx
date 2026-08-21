@@ -8,6 +8,8 @@ export interface EmptyStateProps {
   description?: string;
   action?: React.ReactNode;
   className?: string;
+  /** Smaller vertical padding / min-height for dense panels. */
+  compact?: boolean;
 }
 
 export function EmptyState({
@@ -16,11 +18,13 @@ export function EmptyState({
   description,
   action,
   className,
+  compact,
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "flex min-h-[260px] flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-card/30 p-8 text-center",
+        "flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-card/30 text-center",
+        compact ? "min-h-[140px] p-4" : "min-h-[260px] p-8",
         className
       )}
     >

@@ -1,18 +1,28 @@
 import type { PortalRoute } from "../../../lib/portalRoutes";
+import { Redirect } from "wouter";
 import AcessosPage from "./AcessosPage";
-import { PAGE_GESTAO_ACESSOS, SYSTEM_GESTAO } from "./systems";
+import { PAGE_EMPRESA_ACESSOS, SYSTEM_EMPRESA } from "./systems";
+
+function RedirectGestaoAcessos() {
+  return <Redirect to="/aios/acessos" />;
+}
 
 /**
- * Rotas admin empresa (/gestao/acessos).
- * prompt 4 registra isto no casco (App.tsx).
+ * Rotas admin empresa — criador de acessos no portal Dev (AIOS).
  */
 export const routes: PortalRoute[] = [
   {
-    path: "/gestao/acessos",
+    path: "/aios/acessos",
     component: AcessosPage,
-    system: SYSTEM_GESTAO,
-    page: PAGE_GESTAO_ACESSOS,
+    system: SYSTEM_EMPRESA,
+    page: PAGE_EMPRESA_ACESSOS,
     nav: { label: "Acessos", order: 10 },
+  },
+  {
+    path: "/gestao/acessos",
+    component: RedirectGestaoAcessos,
+    system: SYSTEM_EMPRESA,
+    page: PAGE_EMPRESA_ACESSOS,
   },
 ];
 

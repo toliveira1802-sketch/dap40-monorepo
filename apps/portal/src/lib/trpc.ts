@@ -8,6 +8,7 @@ import type {
 } from "./routerTypes";
 import type { WorkshopBay, WorkshopResourceRow } from "../shared/workshop";
 import type { PatioStage, CollaboratorPosition } from "../shared/patio";
+import * as crmStore from "./crmMemoryStore";
 
 // Initial Mock Data with numeric IDs
 const initialCollaborators: CollaboratorItem[] = [
@@ -774,15 +775,21 @@ class WorkshopStateStore {
 
 export const store = new WorkshopStateStore();
 
-// React hook to trigger re-renders when store updates
+const MOCK_USER_ID = 1;
+
+// React hook to trigger re-renders when workshop or CRM store updates
 function useStoreSubscription() {
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
   useEffect(() => {
-    const unsubscribe = store.subscribe(() => setTick(t => t + 1));
+    const bump = () => setTick(t => t + 1);
+    const unsubWorkshop = store.subscribe(bump);
+    const unsubCrm = crmStore.subscribe(bump);
     return () => {
-      unsubscribe();
+      unsubWorkshop();
+      unsubCrm();
     };
   }, []);
+  return tick;
 }
 
 // Query hook factory
@@ -793,7 +800,7 @@ function createQueryHook<TData, TVariables = any>(
     variables?: TVariables,
     options?: { enabled?: boolean; refetchInterval?: number | false; refetchIntervalInBackground?: boolean }
   ) {
-    useStoreSubscription();
+    const tick = useStoreSubscription();
     const enabled = options?.enabled !== false;
     const [data, setData] = useState<TData>(() => (enabled ? fetcher(variables) : (undefined as any)));
     const [isLoading] = useState(false);
@@ -803,7 +810,7 @@ function createQueryHook<TData, TVariables = any>(
       if (enabled) {
         setData(fetcher(variables));
       }
-    }, [variables, enabled]);
+    }, [variables, enabled, tick]);
 
     const refetch = useCallback(async () => {
       setIsFetching(true);
@@ -824,6 +831,10 @@ function createQueryHook<TData, TVariables = any>(
       refetch,
     };
   };
+}
+
+function crmInvalidate() {
+  crmStore.notify();
 }
 
 // Mutation hook factory
@@ -974,6 +985,77 @@ export const trpc = {
             cancel: async () => {},
             invalidate: (_params?: any) => store.notify(),
           },
+        },
+      },
+      crm: {
+        invalidate: (_params?: any) => crmInvalidate(),
+        dashboard: {
+          overview: { invalidate: (_params?: any) => crmInvalidate() },
+        },
+        inbox: {
+          listConversations: { invalidate: (_params?: any) => crmInvalidate() },
+          listMessages: { invalidate: (_params?: any) => crmInvalidate() },
+        },
+        anna: {
+          listSuggestions: { invalidate: (_params?: any) => crmInvalidate() },
+        },
+        leads: {
+          list: { invalidate: (_params?: any) => crmInvalidate() },
+        },
+        contacts: {
+          list: { invalidate: (_params?: any) => crmInvalidate() },
+          get: { invalidate: (_params?: any) => crmInvalidate() },
+        },
+        conversion: {
+          list: { invalidate: (_params?: any) => crmInvalidate() },
+        },
+        pipeline: {
+          list: {
+            cancel: async () => {},
+            getData: () => crmStore.listCrmOpportunities(),
+            setData: (
+              paramsOrUpdater:
+                | undefined
+                | ReturnType<typeof crmStore.listCrmOpportunities>
+                | ((
+                    current:
+                      | ReturnType<typeof crmStore.listCrmOpportunities>
+                      | undefined
+                  ) =>
+                    | ReturnType<typeof crmStore.listCrmOpportunities>
+                    | undefined
+                    | null),
+              maybeUpdater?:
+                | ReturnType<typeof crmStore.listCrmOpportunities>
+                | ((
+                    current:
+                      | ReturnType<typeof crmStore.listCrmOpportunities>
+                      | undefined
+                  ) =>
+                    | ReturnType<typeof crmStore.listCrmOpportunities>
+                    | undefined
+                    | null)
+            ) => {
+              const updater =
+                typeof paramsOrUpdater === "function" ||
+                Array.isArray(paramsOrUpdater)
+                  ? paramsOrUpdater
+                  : maybeUpdater;
+              if (updater === undefined) return;
+              const current = crmStore.listCrmOpportunities();
+              const next =
+                typeof updater === "function" ? updater(current) : updater;
+              if (!next) return;
+              crmStore.patchOpportunityStages(
+                next.map(o => ({
+                  id: o.id,
+                  pipelineStageId: o.pipelineStageId,
+                }))
+              );
+            },
+            invalidate: (_params?: any) => crmInvalidate(),
+          },
+          config: { invalidate: (_params?: any) => crmInvalidate() },
         },
       },
     };
@@ -1586,9 +1668,177 @@ export const trpc = {
           canDeleteOrders: true,
           canOperatePatio: true,
           canCancelServiceOrder: true,
+          canWriteCrm: true,
           userRole: "ADMIN",
         };
       }),
+    },
+  },
+
+  // CRM (comercial) — mock wired to crmMemoryStore
+  crm: {
+    dashboard: {
+      overview: {
+        useQuery: createQueryHook(() => crmStore.getCrmDashboardOverview()),
+      },
+    },
+    inbox: {
+      listConversations: {
+        useQuery: createQueryHook(() => crmStore.listCrmConversations()),
+      },
+      listMessages: {
+        useQuery: createQueryHook(
+          (params?: { conversationId?: string }) => {
+            if (!params?.conversationId) return [];
+            return crmStore.listCrmMessages(params.conversationId);
+          }
+        ),
+      },
+      sendMessage: {
+        useMutation: createMutationHook(
+          (vars: {
+            conversationId: string;
+            body: string;
+            idempotencyKey?: string;
+          }) =>
+            crmStore.sendCrmOutboundMessage({
+              conversationId: vars.conversationId,
+              body: vars.body,
+              senderUserId: MOCK_USER_ID,
+              idempotencyKey: vars.idempotencyKey,
+            })
+        ),
+      },
+    },
+    anna: {
+      listSuggestions: {
+        useQuery: createQueryHook(
+          (params?: { conversationId?: string }) => {
+            if (!params?.conversationId) return [];
+            return crmStore.listAnnaSuggestions(params.conversationId);
+          }
+        ),
+      },
+      generate: {
+        useMutation: createMutationHook(
+          (vars: {
+            conversationId: string;
+            contactId: string;
+            intent?: any;
+          }) => crmStore.generateAnnaSuggestion(vars)
+        ),
+      },
+      decide: {
+        useMutation: createMutationHook(
+          (vars: {
+            suggestionId: string;
+            action: any;
+            finalContent?: string;
+            reasons?: string[];
+          }) =>
+            crmStore.decideAnnaSuggestion({
+              ...vars,
+              userId: MOCK_USER_ID,
+            })
+        ),
+      },
+    },
+    leads: {
+      list: {
+        useQuery: createQueryHook(() => crmStore.listCrmLeads()),
+      },
+      create: {
+        useMutation: createMutationHook((vars: any) =>
+          crmStore.createCrmLead({
+            ...vars,
+            ownerUserId: MOCK_USER_ID,
+          })
+        ),
+      },
+      update: {
+        useMutation: createMutationHook((vars: any) =>
+          crmStore.updateCrmLead(vars)
+        ),
+      },
+    },
+    pipeline: {
+      config: {
+        useQuery: createQueryHook(() => crmStore.getPipelineConfig()),
+      },
+      list: {
+        useQuery: createQueryHook(() => crmStore.listCrmOpportunities()),
+      },
+      create: {
+        useMutation: createMutationHook(
+          (vars: {
+            title: string;
+            contactId: string;
+            pipelineStageId?: string;
+            estimatedValueReais?: number;
+            temperature?: any;
+            nextAction?: string;
+          }) =>
+            crmStore.createCrmOpportunity({
+              title: vars.title,
+              contactId: vars.contactId,
+              pipelineStageId: vars.pipelineStageId ?? "stage_novo_lead",
+              estimatedValueCents: Math.round(
+                (vars.estimatedValueReais ?? 0) * 100
+              ),
+              temperature: vars.temperature,
+              nextAction: vars.nextAction,
+              userId: MOCK_USER_ID,
+            })
+        ),
+      },
+      moveStage: {
+        useMutation: createMutationHook(
+          (vars: {
+            opportunityId: string;
+            toStageId: string;
+            note?: string;
+            lostReason?: string;
+          }) =>
+            crmStore.moveCrmOpportunityStage({
+              opportunityId: vars.opportunityId,
+              toStageId: vars.toStageId,
+              userId: MOCK_USER_ID,
+              note: vars.note,
+              lostReason: vars.lostReason,
+            })
+        ),
+      },
+    },
+    contacts: {
+      list: {
+        useQuery: createQueryHook(() => crmStore.listCrmContacts()),
+      },
+      get: {
+        useQuery: createQueryHook((params?: { id?: string }) => {
+          if (!params?.id) return null;
+          return crmStore.getCrmContact(params.id);
+        }),
+      },
+    },
+    conversion: {
+      list: {
+        useQuery: createQueryHook(() => crmStore.listErpConversionIntents()),
+      },
+      create: {
+        useMutation: createMutationHook((vars: any) =>
+          crmStore.createErpConversionIntent(vars)
+        ),
+      },
+      resolve: {
+        useMutation: createMutationHook((vars: any) =>
+          crmStore.resolveErpConversionIntent(vars)
+        ),
+      },
+    },
+    seedDemo: {
+      useMutation: createMutationHook(() =>
+        crmStore.seedCrmDemoIfEmpty(MOCK_USER_ID)
+      ),
     },
   },
 };

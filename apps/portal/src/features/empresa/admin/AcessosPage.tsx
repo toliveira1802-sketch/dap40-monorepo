@@ -17,7 +17,7 @@ import {
   isMasterRole,
   useSession,
 } from "../../shared/auth";
-import { canAccessPortal } from "./canAccess";
+import { canAccessPortal, hasProjectFloatAccess } from "./canAccess";
 import {
   fetchAccessPages,
   fetchAccessUsers,
@@ -30,8 +30,8 @@ import {
 import {
   ACCESS_LEVEL_LABELS,
   MANAGED_SYSTEMS,
-  PAGE_GESTAO_ACESSOS,
-  SYSTEM_GESTAO,
+  PAGE_EMPRESA_ACESSOS,
+  SYSTEM_EMPRESA,
   systemLabel,
   type ManagedSystem,
 } from "./systems";
@@ -59,15 +59,15 @@ function RequireGestaoAcessos({ children }: { children: ReactNode }) {
       setPageOk(null);
       return;
     }
-    if (isMasterRole(session.role)) {
+    if (hasProjectFloatAccess(session.systems, session.role)) {
       setPageOk(true);
       return;
     }
-    if (!canAccessPortal(session.systems, SYSTEM_GESTAO, session.role)) {
+    if (!canAccessPortal(session.systems, SYSTEM_EMPRESA, session.role)) {
       setPageOk(false);
       return;
     }
-    void hasPageGrant(PAGE_GESTAO_ACESSOS)
+    void hasPageGrant(PAGE_EMPRESA_ACESSOS)
       .then(ok => {
         if (mounted) setPageOk(ok);
       })
