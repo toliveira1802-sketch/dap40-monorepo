@@ -87,7 +87,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="dark">
     <PeriodProvider>
     <SidebarProvider
       style={
