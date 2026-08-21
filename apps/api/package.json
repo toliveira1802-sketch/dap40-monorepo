@@ -6,20 +6,26 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsup src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@dap40/database": "workspace:*",
     "@dap40/types": "workspace:*",
     "@dap40/utils": "workspace:*",
     "@fastify/cors": "^9.0.1",
+    "@trpc/server": "^11.1.0",
     "dotenv": "^16.4.5",
-    "fastify": "^4.26.2"
+    "drizzle-orm": "^0.30.10",
+    "fastify": "^4.26.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.12.0",
     "tsup": "^8.0.2",
     "tsx": "^4.7.1",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^3.0.0"
   }
 }
