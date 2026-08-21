@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { cn } from "../../../lib/utils";
 import {
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
@@ -13,73 +12,23 @@ import {
 import { Button } from "@dap40/ui";
 import { BrandLogo } from "./BrandLogo";
 import { useSession, isMasterRole } from "../auth";
-import { listUnlockedPortals, type SessionSystems } from "../../../lib/portals";
+import { listUnlockedPortals } from "../../../lib/portals";
 import {
   listPortalNavItems,
   resolveActivePortal,
   routeMatchesPath,
 } from "../../../lib/routeRegistry";
-import type { AccessSystem, UserRole } from "@dap40/types";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../../../components/ui/collapsible";
-
-function portalOpenKey(portalId: AccessSystem) {
-  return `dap-sidebar-portal:${portalId}`;
-}
-
-function readOpen(portalId: AccessSystem, fallback: boolean) {
-  try {
-    const raw = localStorage.getItem(portalOpenKey(portalId));
-    if (raw === null) return fallback;
-    return raw === "1";
-  } catch {
-    return fallback;
-  }
-}
-
-function writeOpen(portalId: AccessSystem, open: boolean) {
-  try {
-    localStorage.setItem(portalOpenKey(portalId), open ? "1" : "0");
-  } catch {
-    /* ignore */
-  }
-}
 
 export function Sidebar() {
   const [location, setLocation] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [openPortals, setOpenPortals] = useState<Partial<Record<AccessSystem, boolean>>>({});
   const { session } = useSession();
 
   const unlockedPortals = listUnlockedPortals(session?.systems, session?.role);
   const activePortal = resolveActivePortal(location, session?.systems, session?.role);
-
-  const unlockedIds = unlockedPortals.map(p => p.id).join("|");
-
-  useEffect(() => {
-    const ids = unlockedIds ? (unlockedIds.split("|") as AccessSystem[]) : [];
-    setOpenPortals(prev => {
-      const next = { ...prev };
-      for (const id of ids) {
-        if (next[id] === undefined) {
-          next[id] = readOpen(id, activePortal?.id === id);
-        }
-      }
-      if (activePortal?.id) {
-        next[activePortal.id] = true;
-        writeOpen(activePortal.id, true);
-      }
-      return next;
-    });
-  }, [unlockedIds, activePortal?.id]);
-
-  const togglePortal = (portalId: AccessSystem, open: boolean) => {
-    setOpenPortals(prev => ({ ...prev, [portalId]: open }));
-    writeOpen(portalId, open);
-  };
+  const portalScreens = activePortal
+    ? listPortalNavItems(activePortal.id, session?.systems, session?.role)
+    : [];
 
   return (
     <aside
@@ -109,7 +58,7 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <div className="relative flex flex-1 flex-col gap-4 overflow-y-auto px-2 py-3">
+      <div className="relative flex flex-1 flex-col gap-6 overflow-y-auto px-2 py-3">
         <div>
           {!collapsed ? <p className="dap-kicker mb-2 px-2">Portais</p> : null}
           <nav className="space-y-1">
@@ -126,23 +75,69 @@ export function Sidebar() {
               {!collapsed ? <span className="truncate font-medium">Hub</span> : null}
             </button>
 
-            {unlockedPortals.map(portal => (
-              <PortalMenu
-                key={portal.id}
-                portalId={portal.id}
-                label={portal.label}
-                path={portal.path}
-                collapsed={collapsed}
-                open={Boolean(openPortals[portal.id])}
-                onOpenChange={open => togglePortal(portal.id, open)}
-                location={location}
-                systems={session?.systems}
-                role={session?.role}
-                onNavigate={setLocation}
-              />
-            ))}
+            {unlockedPortals.map(portal => {
+              const isMatch =
+                activePortal?.id === portal.id ||
+                location === portal.path ||
+                location.startsWith(`${portal.path}/`);
+              return (
+                <button
+                  key={portal.id}
+                  type="button"
+                  title={collapsed ? portal.label : undefined}
+                  onClick={() => setLocation(portal.path)}
+                  className={cn(
+                    "group flex w-full items-center gap-3 rounded-sm px-2 py-2 text-sm transition-colors duration-150",
+                    isMatch ? "dap-nav-active" : "dap-nav-idle"
+                  )}
+                >
+                  <Wrench className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+                  {!collapsed ? (
+                    <span className="min-w-0 flex-1 truncate text-left font-medium">
+                      {portal.label}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
           </nav>
         </div>
+
+        {activePortal && portalScreens.length > 0 ? (
+          <div>
+            {!collapsed ? (
+              <p className="dap-kicker mb-2 px-2">{activePortal.label}</p>
+            ) : null}
+            <nav className="space-y-1">
+              {portalScreens.map(route => {
+                const nav = route.nav!;
+                const isMatch = routeMatchesPath(route, location);
+                const Icon = nav.icon ?? Circle;
+
+                return (
+                  <button
+                    key={route.path}
+                    type="button"
+                    title={collapsed ? nav.label : undefined}
+                    onClick={() => setLocation(route.path)}
+                    className={cn(
+                      "group flex w-full items-center gap-3 rounded-sm px-2 py-2 text-sm transition-colors duration-150",
+                      isMatch ? "dap-nav-active" : "dap-nav-idle",
+                      nav.highlight && !isMatch && "text-dap-red hover:text-dap-red"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+                    {!collapsed ? (
+                      <span className="min-w-0 flex-1 truncate text-left font-medium">
+                        {nav.label}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        ) : null}
       </div>
 
       <div className="relative border-t border-dap-red-deep/50 bg-dap-black/40 p-3">
@@ -167,133 +162,5 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
-  );
-}
-
-function PortalMenu({
-  portalId,
-  label,
-  path,
-  collapsed,
-  open,
-  onOpenChange,
-  location,
-  systems,
-  role,
-  onNavigate,
-}: {
-  portalId: AccessSystem;
-  label: string;
-  path: string;
-  collapsed: boolean;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  location: string;
-  systems: SessionSystems | null | undefined;
-  role: UserRole | null | undefined;
-  onNavigate: (path: string) => void;
-}) {
-  const screens = listPortalNavItems(portalId, systems, role);
-  const isActive =
-    location === path ||
-    location.startsWith(`${path}/`) ||
-    screens.some(r => routeMatchesPath(r, location));
-
-  if (collapsed) {
-    return (
-      <button
-        type="button"
-        title={label}
-        onClick={() => onNavigate(path)}
-        className={cn(
-          "group flex w-full items-center justify-center rounded-sm px-2 py-2 text-sm transition-colors duration-150",
-          isActive ? "dap-nav-active" : "dap-nav-idle"
-        )}
-      >
-        <Wrench className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-      </button>
-    );
-  }
-
-  if (screens.length === 0) {
-    return (
-      <button
-        type="button"
-        onClick={() => onNavigate(path)}
-        className={cn(
-          "group flex w-full items-center gap-3 rounded-sm px-2 py-2 text-sm transition-colors duration-150",
-          isActive ? "dap-nav-active" : "dap-nav-idle"
-        )}
-      >
-        <Wrench className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-        <span className="min-w-0 flex-1 truncate text-left font-medium">{label}</span>
-      </button>
-    );
-  }
-
-  return (
-    <Collapsible open={open} onOpenChange={onOpenChange}>
-      <div
-        className={cn(
-          "rounded-sm",
-          isActive && !open ? "dap-nav-active" : undefined
-        )}
-      >
-        <div className="flex items-center gap-0.5">
-          <button
-            type="button"
-            onClick={() => onNavigate(path)}
-            className={cn(
-              "group flex min-w-0 flex-1 items-center gap-3 rounded-sm px-2 py-2 text-sm transition-colors duration-150",
-              isActive ? "dap-nav-active" : "dap-nav-idle"
-            )}
-          >
-            <Wrench className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-            <span className="min-w-0 flex-1 truncate text-left font-medium">{label}</span>
-          </button>
-          <CollapsibleTrigger asChild>
-            <button
-              type="button"
-              className="rounded-sm p-2 text-dap-gray transition-colors hover:text-dap-white"
-              aria-label={open ? `Recolher ${label}` : `Expandir ${label}`}
-            >
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform duration-150",
-                  open && "rotate-180"
-                )}
-              />
-            </button>
-          </CollapsibleTrigger>
-        </div>
-
-        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-none">
-          <div className="mb-1 ml-3 space-y-0.5 border-l border-dap-red-deep/40 pl-2">
-            {screens.map(route => {
-              const nav = route.nav!;
-              const isMatch = routeMatchesPath(route, location);
-              const Icon = nav.icon ?? Circle;
-              return (
-                <button
-                  key={route.path}
-                  type="button"
-                  onClick={() => onNavigate(route.path)}
-                  className={cn(
-                    "group flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm transition-colors duration-150",
-                    isMatch ? "dap-nav-active" : "dap-nav-idle",
-                    nav.highlight && !isMatch && "text-dap-red hover:text-dap-red"
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
-                  <span className="min-w-0 flex-1 truncate text-left text-[0.8125rem] font-medium">
-                    {nav.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
   );
 }
