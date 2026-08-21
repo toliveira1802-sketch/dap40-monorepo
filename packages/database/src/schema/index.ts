@@ -8,6 +8,7 @@ export {
   accessGrants,
   accessPageGrants,
 } from "./access";
+export * from "./crm";
 
 /** @deprecated Prefer userRoleEnum / public.user_role canônico (MASTER…). */
 export const roleEnum = pgEnum("legacy_app_role", ["ADMIN", "CONSULTOR", "TECNICO", "CLIENTE"]);
