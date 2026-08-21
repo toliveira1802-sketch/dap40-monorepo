@@ -139,12 +139,25 @@ function buildGraphPayload(channel: InboxChannel, to: string, text: string) {
   };
 }
 
+function hubParam(query: unknown, key: "mode" | "verify_token" | "challenge"): string {
+  const rec = asRecord(query);
+  if (!rec) return "";
+  const dotted = rec[`hub.${key}`];
+  if (typeof dotted === "string") return dotted;
+  if (Array.isArray(dotted) && typeof dotted[0] === "string") return dotted[0];
+  const hub = asRecord(rec.hub);
+  const nested = hub?.[key];
+  if (typeof nested === "string") return nested;
+  if (Array.isArray(nested) && typeof nested[0] === "string") return nested[0];
+  return nested == null ? "" : String(nested);
+}
+
 const metaInboxPlugin: FastifyPluginAsync = async server => {
-  server.get("/webhooks/meta", async (request, reply) => {
-    const q = request.query as Record<string, string | undefined>;
-    const mode = q["hub.mode"];
-    const token = q["hub.verify_token"];
-    const challenge = q["hub.challenge"];
+  // logLevel silent: GET traz hub.verify_token na query — não logar token.
+  server.get("/webhooks/meta", { logLevel: "silent" }, async (request, reply) => {
+    const mode = hubParam(request.query, "mode");
+    const token = hubParam(request.query, "verify_token");
+    const challenge = hubParam(request.query, "challenge");
     const expected = process.env.META_VERIFY_TOKEN;
 
     if (mode === "subscribe" && expected && token === expected && challenge) {
@@ -176,13 +189,6 @@ const metaInboxPlugin: FastifyPluginAsync = async server => {
     }
 
     const channel = channelRaw as InboxChannel;
-    if (channel === "whatsapp" && !process.env.META_PHONE_NUMBER_ID) {
-      return reply.code(500).send({ error: "META_PHONE_NUMBER_ID não configurado." });
-    }
-    if ((channel === "messenger" || channel === "instagram") && !process.env.META_PAGE_ID) {
-      return reply.code(500).send({ error: "META_PAGE_ID não configurado." });
-    }
-
     const payload = buildGraphPayload(channel, to, text);
     const token = process.env.META_GRAPH_TOKEN;
 
@@ -191,6 +197,13 @@ const metaInboxPlugin: FastifyPluginAsync = async server => {
         error: "META_GRAPH_TOKEN ausente — envio não executado.",
         would_send: payload,
       });
+    }
+
+    if (channel === "whatsapp" && !process.env.META_PHONE_NUMBER_ID) {
+      return reply.code(500).send({ error: "META_PHONE_NUMBER_ID não configurado." });
+    }
+    if ((channel === "messenger" || channel === "instagram") && !process.env.META_PAGE_ID) {
+      return reply.code(500).send({ error: "META_PAGE_ID não configurado." });
     }
 
     const graphRes = await fetch(payload.url, {
